@@ -195,7 +195,6 @@ class SqLiteIndex implements IndexInterface {
 		if ($result === false) {
 			return $resultArray;
 		}
-		
 		while ($resultRow = $result->fetchArray(SQLITE3_ASSOC)) {
 			$resultArray[] = $resultRow;
 		}
@@ -277,7 +276,7 @@ class SqLiteIndex implements IndexInterface {
 	protected function loadAvailablePropertyFields() {
 		$result = $this->connection->query('PRAGMA table_info(objects);');
 		while ($property = $result->fetchArray(SQLITE3_ASSOC)) {
-			$this->propertyFieldsAvailable[] = $property['name'];
+			$this->propertyFieldsAvailable[] = strtolower($property['name']);
 		}
 	}
 
@@ -286,7 +285,7 @@ class SqLiteIndex implements IndexInterface {
 	 */
 	protected function addPropertyToIndex($propertyName) {
 		$this->connection->exec('ALTER TABLE objects ADD COLUMN "' . $propertyName . '";');
-		$this->propertyFieldsAvailable[] = $propertyName;
+		$this->propertyFieldsAvailable[] = strtolower($propertyName);
 	}
 
 	/**
@@ -295,7 +294,7 @@ class SqLiteIndex implements IndexInterface {
 	 */
 	protected function adjustIndexToGivenProperties(array $propertyNames) {
 		foreach ($propertyNames as $propertyName) {
-			if (!in_array($propertyName, $this->propertyFieldsAvailable)) {
+			if (!in_array(strtolower($propertyName), $this->propertyFieldsAvailable)) {
 				$this->addPropertyToIndex($propertyName);
 			}
 		}
