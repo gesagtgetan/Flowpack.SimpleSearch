@@ -110,13 +110,14 @@ class SqLiteIndex implements IndexInterface
         $valueNamesString = ':__identifier__, ';
         $statementArgumentNumber = 1;
         foreach ($properties as $propertyName => $propertyValue) {
-            $propertyColumnNamesString .= '"' . $propertyName . '", ';
+            $propertyColumnNamesString .= '"' . strtolower($propertyName) . '", ';
             $valueNamesString .= $this->preparedStatementArgumentName($statementArgumentNumber) . ', ';
             $statementArgumentNumber++;
         }
         $propertyColumnNamesString = trim($propertyColumnNamesString, ", \t\n\r\0\x0B");
         $valueNamesString = trim($valueNamesString, ", \t\n\r\0\x0B");
-        $preparedStatement = $this->connection->prepare('INSERT OR REPLACE INTO objects (' . $propertyColumnNamesString . ') VALUES (' . $valueNamesString . ');');
+        $query = 'INSERT OR REPLACE INTO objects (' . $propertyColumnNamesString . ') VALUES (' . $valueNamesString . ');';
+        $preparedStatement = $this->connection->prepare($query);
 
         $statementArgumentNumber = 1;
         foreach ($properties as $propertyValue) {
@@ -272,7 +273,7 @@ class SqLiteIndex implements IndexInterface
     {
         $result = $this->connection->query('PRAGMA table_info(objects);');
         while ($property = $result->fetchArray(SQLITE3_ASSOC)) {
-            $this->propertyFieldsAvailable[] = $property['name'];
+            $this->propertyFieldsAvailable[] = strtolower($property['name']);
         }
     }
 
@@ -282,7 +283,7 @@ class SqLiteIndex implements IndexInterface
     protected function addPropertyToIndex(string $propertyName): void
     {
         $this->connection->exec('ALTER TABLE objects ADD COLUMN "' . $propertyName . '";');
-        $this->propertyFieldsAvailable[] = $propertyName;
+        $this->propertyFieldsAvailable[] = strtolower($propertyName);
     }
 
     /**
@@ -292,7 +293,7 @@ class SqLiteIndex implements IndexInterface
     protected function adjustIndexToGivenProperties(array $propertyNames): void
     {
         foreach ($propertyNames as $propertyName) {
-            if (!in_array($propertyName, $this->propertyFieldsAvailable, true)) {
+            if (!in_array(strtolower($propertyName), $this->propertyFieldsAvailable, true)) {
                 $this->addPropertyToIndex($propertyName);
             }
         }
