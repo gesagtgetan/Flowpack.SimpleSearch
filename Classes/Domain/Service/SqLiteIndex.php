@@ -101,7 +101,7 @@ class SqLiteIndex implements IndexInterface {
 		$valueNamesString = ':__identifier__, ';
 		$statementArgumentNumber = 1;
 		foreach ($properties as $propertyName => $propertyValue) {
-			$propertyColumnNamesString .= '"' . $propertyName . '", ';
+			$propertyColumnNamesString .= '"' . strtolower($propertyName) . '", ';
 			$valueNamesString .= $this->preparedStatementArgumentName($statementArgumentNumber) . ', ';
 			$statementArgumentNumber++;
 		}
@@ -109,7 +109,8 @@ class SqLiteIndex implements IndexInterface {
 		$propertyColumnNamesString = trim($propertyColumnNamesString, ',');
 		$valueNamesString = trim($valueNamesString);
 		$valueNamesString = trim($valueNamesString, ',');
-		$preparedStatement = $this->connection->prepare('INSERT OR REPLACE INTO objects (' . $propertyColumnNamesString . ') VALUES (' . $valueNamesString . ');');
+		$query = 'INSERT OR REPLACE INTO objects (' . $propertyColumnNamesString . ') VALUES (' . $valueNamesString . ');';
+		$preparedStatement = $this->connection->prepare($query);
 
 		$statementArgumentNumber = 1;
 		foreach ($properties as $propertyValue) {
